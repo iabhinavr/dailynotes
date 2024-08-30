@@ -13,6 +13,9 @@ import {
     nextElem 
 } from "./elements";
 
+import Sortable from 'sortablejs';
+import { createGalleryGrid } from "./editor";
+
 const openImageLibraryModal = async function (action) {
 
     imagesUl.innerHTML = '';
@@ -69,6 +72,14 @@ const imageOnClick = async function (event) {
 }
 
 const multiImageSelector = async function (event) {
+    
+    /**
+     * retrieve the selectedImages, which was set 
+     * when the block's button was clicked
+     * 
+     * then here, modify the array when the items are
+     * selected or un-selected
+     */
 
     let selectedImages = await getSelectedImages();
     let newSelectedImages = [];
@@ -84,8 +95,12 @@ const multiImageSelector = async function (event) {
         newSelectedImages = selectedImages.filter(e => e != imagePath);
         selectedImages = newSelectedImages;
     }
-    console.log(selectedImages);
     setSelectedImages(selectedImages);
+
+    /**
+     * selectedImages is modified, now the rest happens 
+     * when the Insert Images button is clicked (setSelectedImageButtonOnClick)
+     */
 }
 
 const setImageSelectEvent = async function(item) {
@@ -113,7 +128,6 @@ const insertImages = async function (images) {
         let itemImg = document.createElement('img');
 
         let imagePath = image.folder_path + '/' + image.file_name;
-        console.log(imagePath);
 
         item.setAttribute('data-image-id', image.id);
         item.setAttribute('data-image-path', image.folder_path + '/' + image.file_name);
@@ -239,20 +253,30 @@ const setSelectedImageButtonOnClick = async function (event) {
             resultElem.src = fullSrc;
             break;
         case 'insert-gallery-images':
+            /**
+             * get the selectedImages and re-render the gallery
+             * the gallery element was already stored in the state variable
+             */
             let imageList = await getSelectedImages();
             let galleryWrapper = await getGalleryElem();
-            let galleryImagesString = imageList.join(",\n");
-            resultElem.value = galleryImagesString;
 
-            galleryWrapper.innerHTML = '';
+            /**
+             * empty the gallery grid before re-rendering
+             */
 
-            imageList.forEach((item, index) => {
-                let imgWrapper = document.createElement('div');
-                let img = document.createElement('img');
-                img.src = "../uploads/thumbnails/" + item;
-                imgWrapper.appendChild(img);
-                galleryWrapper.appendChild(imgWrapper);
-            })
+            let galleryGrid = galleryWrapper.querySelector('.editorjs-gallery-grid');
+            
+            if(galleryGrid) {
+                galleryGrid.remove();
+            }
+
+            /**
+             * now create the new gallery grid
+             */
+
+            galleryGrid = createGalleryGrid(imageList);
+
+            galleryWrapper.prepend(galleryGrid);
 
             break;
         default:

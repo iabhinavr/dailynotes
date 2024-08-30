@@ -75,6 +75,28 @@ class InsertImage {
     }
 }
 
+const createGalleryGrid = function(imageList) {
+    let galleryGrid = document.createElement('div');
+    galleryGrid.classList.add('editorjs-gallery-grid');
+
+    imageList.forEach((item) => {
+        let imgWrapper = document.createElement('div');
+        let img = document.createElement('img');
+        img.src = "../uploads/thumbnails/" + item;
+        imgWrapper.appendChild(img);
+        galleryGrid.appendChild(imgWrapper);
+    })
+
+    var sortable = new Sortable(galleryGrid, {
+        animation: 150,
+        ghostClass: "sortable-ghost", 
+        chosenClass: "sortable-chosen",
+        dragClass: "sortable-drag",
+    });
+
+    return galleryGrid;
+}
+
 class InsertGallery {
     static get toolbox() {
         return {
@@ -89,31 +111,9 @@ class InsertGallery {
 
     render() {
 
-        let textarea = document.createElement('textarea');
-        textarea.classList.add('form-control', 'mt-2');
+        let imageList = this.data.imageList ? this.data.imageList : [];
 
-        let imageListString = this.data.imageList ? this.data.imageList : '';
-        textarea.value = imageListString;
-
-        let imageList = imageListString.split("\n").map(item => item.trim().replace(/,$/, '')).filter(item => item.length > 0);
-
-        let galleryWrapper = document.createElement('div');
-        galleryWrapper.classList.add('editorjs-gallery-grid');
-
-        imageList.forEach((item) => {
-            let imgWrapper = document.createElement('div');
-            let img = document.createElement('img');
-            img.src = "../uploads/thumbnails/" + item;
-            imgWrapper.appendChild(img);
-            galleryWrapper.appendChild(imgWrapper);
-        })
-
-        var sortable = new Sortable(galleryWrapper, {
-            animation: 150,
-            ghostClass: "sortable-ghost", 
-            chosenClass: "sortable-chosen",
-            dragClass: "sortable-drag",
-        });
+        let galleryGrid = createGalleryGrid(imageList);
 
         let btn = document.createElement('button');
         btn.classList.add('btn', 'btn-primary', 'my-2');
@@ -124,8 +124,51 @@ class InsertGallery {
         btn.addEventListener('click', function(event) {
             event.preventDefault();
 
-            setSelectedImages(imageList);
-            setResultElem(textarea);
+            /**
+             * when the button is clicked, we need to parse the gallery
+             * to find the list of images, then store it to the state variable
+             * selectedImages
+             * 
+             * this state variable can be used to highlight the selected images
+             * in the image-library
+             * 
+             * once the image items are modified (added or removed) from
+             * the image-gallery modal, the selectedImages 
+             * is set to the new value
+             * 
+             * back in the editor, selectedImages is used to re-render
+             * the gallery block
+             * 
+             * after all, the selectedImages is reset to empty array
+             * 
+             */
+
+            // so, let's parse the galleryWrapper to find the images srcs
+
+            let galleryWrapper = event.currentTarget.closest('.editorjs-gallery');
+
+            let imgElems = galleryWrapper.querySelectorAll('img');
+            let imgSrcs = [];
+
+            if(imgElems) {
+                imgElems.forEach((img) => {
+                    let src = img.getAttribute('src');
+                    src = src.replace('../uploads/thumbnails/', '');
+                    imgSrcs.push(src);
+                });
+                console.log(imgSrcs);
+            }
+
+            setSelectedImages(imgSrcs);
+
+            /**
+             * now that the selectedImages is saved to state,
+             * the rest is in image-library
+             * 
+             * before that, save the current galleryWrapper also
+             * to a state variable
+             */
+
             setGalleryElem(galleryWrapper);
 
             setSelectedImageButton.innerHTML = 'Insert Images';
@@ -133,19 +176,17 @@ class InsertGallery {
 
         });
 
-        let wrapper = document.createElement('div');
-        wrapper.appendChild(galleryWrapper);
-        wrapper.appendChild(textarea);
-        wrapper.appendChild(btn);
+        let galleryWrapper = document.createElement('div');
+        galleryWrapper.classList.add('editorjs-gallery');
+        galleryWrapper.appendChild(galleryGrid);
+        galleryWrapper.appendChild(btn);
         
-        return wrapper;
+        return galleryWrapper;
     }
 
     save(blockContent) {
-        const imageList = blockContent.querySelector('textarea').value;
 
-        let imgList = '';
-        let imgListArray = [];
+        let imageList = [];
 
         const galleryImageElems = blockContent.querySelectorAll('.editorjs-gallery-grid img');
 
@@ -153,13 +194,9 @@ class InsertGallery {
             galleryImageElems.forEach((imageElem) => {
                 let imgSrc = imageElem.getAttribute('src');
                 imgSrc = imgSrc.replace("../uploads/thumbnails/", "");
-                imgListArray.push(imgSrc);
+                imageList.push(imgSrc);
             })
-            imgList = imgListArray.join(",\n");
-            console.log(imgList);
-        }
-        
-        
+        }       
 
         return {
             
@@ -258,4 +295,4 @@ let editor = null;
 })();
 
 
-export { InsertImage, editor };
+export { InsertImage, createGalleryGrid, InsertGallery, editor };
