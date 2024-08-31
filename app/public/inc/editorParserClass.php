@@ -118,7 +118,7 @@ class EditorParser {
 
     private function gallery ($block) {
 
-        $imageList = explode(",\n", $block['data']['imageList']);
+        $imageList = $block['data']['imageList'];
 
         $html = '<div class="editorjs-image-gallery">';
         foreach($imageList as $image) {

@@ -72,15 +72,30 @@ if( isset( $_POST['image-upload']) ) {
         echo json_encode(["msg" => "No access"]);
         exit();
     }
-    
-    $data['file_name'] = $_FILES['image']['name'];
-    $data['tmp_name'] = $_FILES['image']['tmp_name'];
-    $data['type'] = $_FILES['image']['type'];
-    $data['size'] = $_FILES['image']['size'];
-    $data['error'] = $_FILES['image']['error'];
-    $data['author'] = $access_obj->get_current_user()['username'];
 
-    $add_image = $image_obj->add_image($data);
+    /**
+     * Handling multiple file uploads:
+     * first, find the total count, then call add_image() one by one
+     */
+
+    $file_count = count($_FILES['image']['name']);
+
+    for ($i=0; $i<$file_count; $i++) {
+        $data['file_name'] = $_FILES['image']['name'][$i];
+        $data['tmp_name'] = $_FILES['image']['tmp_name'][$i];
+        $data['type'] = $_FILES['image']['type'][$i];
+        $data['size'] = $_FILES['image']['size'][$i];
+        $data['error'] = $_FILES['image']['error'][$i];
+        $data['author'] = $access_obj->get_current_user()['username'];
+    
+        $add_image = $image_obj->add_image($data);
+
+        if(!$add_image['status']) {
+            break;
+        }
+    }
+    
+    
 
     // header('Location:image-library.php');
     // exit();
@@ -110,7 +125,7 @@ if(isset($_POST['get_image_count'])) {
 $image_count = $image_obj->get_image_count();
 
 $args = [
-    'per_page' => 12,
+    'per_page' => 50,
     'page_no' => 1,
 ];
 
@@ -153,7 +168,7 @@ $authorization = $access_obj->is_authorized('image', 'read', NULL);
 
         <form action="<?= esc_html($_SERVER['PHP_SELF']) ?>" method="post" enctype="multipart/form-data" class="mb-4 row g-3 align-items-center">
             <div class="col-auto">
-                <input type="file" name="image" id="image" class="form-control">
+                <input type="file" name="image[]" id="image" class="form-control" multiple>
             </div>
             <div class="col-auto">
                 <input type="submit" value="Upload" name="image-upload" class="btn btn-primary">
@@ -183,7 +198,7 @@ $authorization = $access_obj->is_authorized('image', 'read', NULL);
             </div>
             
             
-            <ul class="image-grid row row-cols-4 gy-1 gx-1 list-unstyled">
+            <ul class="image-grid row row-cols-6 gy-1 gx-1 list-unstyled">
                 <?php if ($images['status'] === true) : ?>
                     <?php foreach($images['result'] as $image) : ?>
                         <?php

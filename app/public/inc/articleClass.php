@@ -67,7 +67,7 @@ class Article {
          $offset = ($args['page_no'] - 1) * $limit;
 
         try {
-            $stmt = $this->con->prepare("SELECT * FROM articles ORDER BY published DESC LIMIT :limit OFFSET :offset");
+            $stmt = $this->con->prepare("SELECT * FROM articles ORDER BY modified DESC LIMIT :limit OFFSET :offset");
             $stmt->bindParam(":limit", $limit, PDO::PARAM_INT);
             $stmt->bindParam(":offset", $offset, PDO::PARAM_INT);
             $stmt->execute();

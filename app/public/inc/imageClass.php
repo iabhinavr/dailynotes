@@ -271,7 +271,7 @@ class Image {
 
         if(empty($args)) {
            $args = [
-            "per_page" => 25,
+            "per_page" => 50,
             "page_no" => 1,
            ];
         }

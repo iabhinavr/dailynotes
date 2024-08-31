@@ -13,7 +13,6 @@ import {
     nextElem 
 } from "./elements";
 
-import Sortable from 'sortablejs';
 import { createGalleryGrid } from "./editor";
 
 const openImageLibraryModal = async function (action) {
@@ -24,7 +23,7 @@ const openImageLibraryModal = async function (action) {
 
     const fetchArgs = new FormData();
     fetchArgs.append('fetch-images', "submitted");
-    fetchArgs.append('per_page', 6);
+    fetchArgs.append('per_page', 50);
     fetchArgs.append('page_no', 1);
 
     const fetchImages = await fetch('/admin/image-library.php', {
@@ -38,7 +37,7 @@ const openImageLibraryModal = async function (action) {
         let images = fetchJson.result;
 
         await insertImages(images);
-        calculatePagination(6,1);
+        calculatePagination(50,1);
         
     }
 }
@@ -215,7 +214,7 @@ const paginate = async function (event) {
 
     const fetchArgs = new FormData();
     fetchArgs.append('fetch-images', "submitted");
-    fetchArgs.append('per_page', 6);
+    fetchArgs.append('per_page', 50);
     fetchArgs.append('page_no', page_no);
 
     const fetchImages = await fetch('/admin/image-library.php', {
@@ -229,7 +228,7 @@ const paginate = async function (event) {
         let images = fetchJson.result;
 
         await insertImages(images);
-        calculatePagination(6,page_no);
+        calculatePagination(50,page_no);
         
     }
 }
