@@ -155,6 +155,8 @@ class ArticleHandler extends MainHandler {
         // var_dump($props);
         
         $this->render('article-single', $props);
+
+        $this->render('footer', $props);
     }
 
     public function strip_scripts($content) {
