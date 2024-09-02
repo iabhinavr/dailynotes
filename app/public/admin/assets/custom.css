@@ -141,13 +141,30 @@ html[data-bs-theme="dark"] .ce-popover__item:hover:not(.ce-popover__item--no-vis
     gap: 2px;
 }
 
-.editorjs-gallery-grid > div {
+.editorjs-gallery-grid .gallery-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     width: calc(25% - 6px);
-    height: 180px;
+    height: 200px;
+    padding: 2px;
 }
-.editorjs-gallery-grid img {
+.editorjs-gallery-grid .gallery-item img {
     display: block;
     width: 100%;
-    height: 100%;
+    height: 160px;
     object-fit: cover;
+    border: 1px solid rgb(8, 66, 113);
 }
+
+.editorjs-gallery-grid input.img-caption {
+    color: #eee;
+    display: block;
+    width: 100%;
+    height: 30px;
+    padding: 3px 5px;
+    border: none;
+    background:#555;
+    outline: none;
+}
+

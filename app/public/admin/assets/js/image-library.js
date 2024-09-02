@@ -80,20 +80,22 @@ const multiImageSelector = async function (event) {
      * selected or un-selected
      */
 
-    let selectedImages = await getSelectedImages();
-    let newSelectedImages = [];
+    let selectedImages = getSelectedImages();
+    let imageList = selectedImages.existing;
+    let newImageList = [];
 
     event.currentTarget.classList.toggle('selected');
 
     let imagePath = event.currentTarget.getAttribute('data-image-path');
 
     if(event.currentTarget.classList.contains('selected')) {        
-        selectedImages.unshift(imagePath);
+        imageList.unshift(imagePath);
     }
     else {
-        newSelectedImages = selectedImages.filter(e => e != imagePath);
-        selectedImages = newSelectedImages;
+        newImageList = imageList.filter(e => e != imagePath);
+        imageList = newImageList;
     }
+    selectedImages.new = imageList;
     setSelectedImages(selectedImages);
 
     /**
@@ -256,7 +258,8 @@ const setSelectedImageButtonOnClick = async function (event) {
              * get the selectedImages and re-render the gallery
              * the gallery element was already stored in the state variable
              */
-            let imageList = await getSelectedImages();
+            let selectedImages = getSelectedImages();
+            let imageList = selectedImages.new;
             let galleryWrapper = await getGalleryElem();
 
             /**

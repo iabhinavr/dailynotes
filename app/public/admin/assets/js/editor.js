@@ -8,7 +8,7 @@ import CodeTool from '@editorjs/code';
 import Sortable from 'sortablejs';
 
 import { openImageLibraryModal } from "./image-library";
-import { editorElem, setResultElem, setSelectedImages, setGalleryElem, editArticleForm, setSelectedImageButton } from "./elements";
+import { editorElem, setResultElem, getSelectedImages, setSelectedImages, setGalleryElem, editArticleForm, setSelectedImageButton } from "./elements";
 
 class InsertImage {
     static get toolbox() {
@@ -75,16 +75,23 @@ class InsertImage {
     }
 }
 
-const createGalleryGrid = function(imageList) {
+const createGalleryGrid = function(items) {
     let galleryGrid = document.createElement('div');
     galleryGrid.classList.add('editorjs-gallery-grid');
 
-    imageList.forEach((item) => {
-        let imgWrapper = document.createElement('div');
-        let img = document.createElement('img');
-        img.src = "../uploads/thumbnails/" + item;
-        imgWrapper.appendChild(img);
-        galleryGrid.appendChild(imgWrapper);
+    items.forEach((item) => {
+        let wrapperElem = document.createElement('div');
+        wrapperElem.classList.add('gallery-item');
+        let imgElem = document.createElement('img');
+        imgElem.src = "../uploads/thumbnails/" + item.src;
+        let captionElem = document.createElement('input');
+        captionElem.classList.add('img-caption');
+        captionElem.setAttribute('type', 'text');
+        captionElem.setAttribute('placeholder', 'write a caption...');
+        captionElem.value = item.caption;
+        wrapperElem.appendChild(imgElem);
+        wrapperElem.appendChild(captionElem);
+        galleryGrid.appendChild(wrapperElem);
     })
 
     var sortable = new Sortable(galleryGrid, {
@@ -111,9 +118,9 @@ class InsertGallery {
 
     render() {
 
-        let imageList = this.data.imageList ? this.data.imageList : [];
+        let items = this.data.items ? this.data.items : [];
 
-        let galleryGrid = createGalleryGrid(imageList);
+        let galleryGrid = createGalleryGrid(items);
 
         let btn = document.createElement('button');
         btn.classList.add('btn', 'btn-primary', 'my-2');
@@ -159,7 +166,11 @@ class InsertGallery {
                 console.log(imgSrcs);
             }
 
-            setSelectedImages(imgSrcs);
+            let selectedImages = getSelectedImages();
+            selectedImages.existing = imgSrcs;
+
+            setSelectedImages(selectedImages);
+
 
             /**
              * now that the selectedImages is saved to state,
@@ -186,21 +197,25 @@ class InsertGallery {
 
     save(blockContent) {
 
-        let imageList = [];
+        let items = [];
 
-        const galleryImageElems = blockContent.querySelectorAll('.editorjs-gallery-grid img');
+        const galleryItems = blockContent.querySelectorAll('.gallery-item');
 
-        if(galleryImageElems) {
-            galleryImageElems.forEach((imageElem) => {
-                let imgSrc = imageElem.getAttribute('src');
-                imgSrc = imgSrc.replace("../uploads/thumbnails/", "");
-                imageList.push(imgSrc);
+        if(galleryItems) {
+            galleryItems.forEach((item) => {
+                let src = item.querySelector('img').getAttribute('src');
+                let caption = item.querySelector('input.img-caption').value;
+                src = src.replace("../uploads/thumbnails/", "");
+                items.push({
+                    src: src,
+                    caption: caption,
+                });
             })
         }       
 
         return {
             
-            imageList: imageList
+            items: items
             
         }
     }

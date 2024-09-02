@@ -20,7 +20,10 @@ const svgUse = themeToggler.getElementsByTagName('use')[0];
 const deleteUserForm = document.getElementById('delete-user-form');
 
 let resultElem = null;
-let selectedImages = [];
+let selectedImages = {
+    existing: [],
+    new: []
+};
 let galleryElem = null;
 
 const getResultElem = async function() {
@@ -31,11 +34,11 @@ const setResultElem = async function(elem) {
     resultElem = elem;
 }
 
-const getSelectedImages = async function() {
+const getSelectedImages = function() {
     return selectedImages;
 }
 
-const setSelectedImages = async function(s) {
+const setSelectedImages = function(s) {
     selectedImages = s;
 }
 
